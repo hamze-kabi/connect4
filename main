@@ -1,0 +1,162 @@
+# Connect 4
+import time
+import os
+
+boxes = [[' ' for x in range(7)] for y in range(6)]
+pl = 'X'
+win = False
+
+
+def print_board():
+    for x in range(6):
+        for y in range(7):
+            if y == 6:
+                print(f'|{boxes[x][y]}|', end='')
+            else:
+                print(f'|{boxes[x][y]}', end='')
+        print()
+    for y in range(7):
+        print(' ', end='')
+        print(y + 1, end='')
+    print()
+
+
+def player():
+    global pl
+    if pl == 'O':
+        pl = 'X'
+    else:
+        pl = 'O'
+
+
+def check_empty_box():
+    c = 0
+    for x in range(6):
+        for y in range(7):
+            if boxes[x][y] == ' ':
+                c = 1
+    if c == 0:
+        return check_win_draw(draw=True)
+    player()
+    pos = int(input(f'{pl}\'s turn, Enter a column:\n')) - 1
+    updating_print_board(pos)
+
+
+def updating_print_board(pos):
+    c = 0
+    for p in range(6):
+        if boxes[p][pos] == ' ':
+            c += 1
+    for x in range(c):
+        if boxes[x][pos] == ' ':
+            boxes[x][pos] = pl
+            if x > 0:
+                boxes[x - 1][pos] = ' '
+        print_board()
+        time.sleep(0.3)
+        os.system('CLS')
+    print_board()
+    check_win_draw()
+
+
+def check_win_draw(draw=False):
+    if draw:
+        print('Draw!')
+        exit()
+    if not draw:
+        for x in range(6):
+            if boxes[x].count(pl) >= 4:  # check horizontal
+                c = 0
+                for i in range(5):
+                    if boxes[x][i] == pl and boxes[x][i + 1] == pl:
+                        c += 1
+                if c >= 3:
+                    print(f'player {pl} has won!')
+                    exit()
+            col = []
+            for y in range(6):  # check vertically
+                col.append((boxes[y][x]))
+            if col.count(pl) >= 4:
+                c = 0
+                for i in range(4):
+                    if col[i] == pl and col[i + 1] == pl:
+                        c += 1
+                if c >= 3:
+                    print(f'player {pl} has won!')
+                    exit()
+
+    li = [[] for s in range(20)]  # check diagonal
+    idx = []
+    i_pos = list(range(7))
+    j_pos = list(range(7))
+    for x in range(6):
+        for y in range(7):
+            i = x
+            j = y
+            while True:
+                try:
+                    if i not in i_pos or j not in j_pos:
+                        break
+                    else:
+                        if (i, j) not in idx:
+                            li[i - j].append(boxes[i][j])
+                            idx.append((i, j))
+                            i += 1
+                            j += 1
+                        else:
+                            break
+                except IndexError:
+                    break
+    li = [l for l in li if l != []]
+    for s in li:
+        if s.count(pl) >= 4:
+            c = 0
+            for i in range(5):
+                if s[i] == pl and s[i + 1] == pl:
+                    c += 1
+            if c >= 3:
+                print(f'player {pl} has won!')
+                exit()
+
+    li = [[] for b in range(15)]  # check counter diagonal
+    idx = []
+    i_pos = list(range(7))
+    j_pos = list(range(7))
+    for x in range(6):
+        for y in range(7):
+            i = x
+            j = y
+            while True:
+                try:
+                    if i not in i_pos or j not in j_pos:
+                        break
+                    else:
+                        if (i, j) not in idx:
+                            li[i + j].append(boxes[i][j])
+                            idx.append((i, j))
+                            i += 1
+                            j -= 1
+                        else:
+                            break
+                except IndexError:
+                    break
+    for indx, spot in enumerate(li):
+        if not spot:
+            li = li[:indx]
+            break
+    for l in li:
+        if l.count(pl) >= 4:
+            c = 0
+            for i in range(5):
+                if l[i] == pl and l[i + 1] == pl:
+                    c += 1
+            if c >= 3:
+                print(f'player {pl} has won!')
+                exit()
+    check_empty_box()
+
+if __name__ == "__main__":
+    print('Welcome to Connect 4')
+    print_board()
+    check_empty_box()
+    input('Press any key to exit\n')
